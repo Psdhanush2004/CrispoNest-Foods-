@@ -159,9 +159,20 @@
         margin: 0 7px;
       }
     }
-  </style>
-</head>
+    
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<script>
+  const SUPABASE_URL = "https://vmwrnuoseaefveszist.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_UPtx7gi3eE8iZdOqjbEwPw_PfwWLR3k";
+
+  const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+  );
+</script> 
+  
 <body>
 
   <header>
