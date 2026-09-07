@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>CrispoNest Foods | Traditional Snacks</title>
+
+  <meta name="description"
+        content="CrispoNest Foods - Traditional Indian snacks, product catalogue and online ordering.">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #fffaf3;
+      color: #2b1a10;
+      line-height: 1.6;
+    }
+
+    header {
+      background: #ffffff;
+      padding: 18px 6%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .logo {
+      font-size: 25px;
+      font-weight: bold;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: #2b1a10;
+      margin-left: 20px;
+      font-weight: 600;
+    }
+
+    .hero {
+      min-height: 75vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 60px 20px;
+      background: linear-gradient(135deg, #fff1d6, #fffaf3);
+    }
+
+    .hero h1 {
+      font-size: clamp(40px, 7vw, 72px);
+      margin-bottom: 15px;
+    }
+
+    .hero p {
+      font-size: 20px;
+      max-width: 650px;
+      margin: 0 auto 30px;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 14px 25px;
+      border-radius: 30px;
+      background: #8b4513;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      margin: 5px;
+    }
+
+    .button.secondary {
+      background: white;
+      color: #8b4513;
+      border: 2px solid #8b4513;
+    }
+
+    section {
+      padding: 70px 6%;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 35px;
+      margin-bottom: 40px;
+    }
+
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 25px;
+      max-width: 1100px;
+      margin: auto;
+    }
+
+    .product {
+      background: white;
+      border-radius: 18px;
+      padding: 25px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .product-image {
+      height: 180px;
+      background: #f5e6d0;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+      font-size: 20px;
+      color: #8b4513;
+    }
+
+    .product h3 {
+      margin-bottom: 8px;
+    }
+
+    .product p {
+      color: #666;
+    }
+
+    .about {
+      text-align: center;
+      max-width: 850px;
+      margin: auto;
+    }
+
+    .contact {
+      background: #fff1d6;
+      text-align: center;
+    }
+
+    footer {
+      background: #2b1a10;
+      color: white;
+      text-align: center;
+      padding: 25px;
+    }
+
+    @media (max-width: 700px) {
+      header {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      nav a {
+        margin: 0 7px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="logo">CrispoNest Foods</div>
+
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#products">Products</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+
+  <main>
+
+    <section class="hero" id="home">
+      <div>
+        <h1>CrispoNest Foods</h1>
+
+        <p>
+          Traditional Indian snacks made with taste, quality and care.
+        </p>
+
+        <a href="#products" class="button">
+          View Products
+        </a>
+
+        <a href="#contact" class="button secondary">
+          Enquire Now
+        </a>
+      </div>
+    </section>
+
+
+    <section id="products">
+
+      <h2 class="section-title">
+        Our Products
+      </h2>
+
+      <div class="products">
+
+        <div class="product">
+          <div class="product-image">
+            Product Image
+          </div>
+
+          <h3>Nippat</h3>
+
+          <p>
+            Traditional crispy snack.
+          </p>
+
+          <a href="#contact" class="button">
+            Enquire
+          </a>
+        </div>
+
+
+        <div class="product">
+          <div class="product-image">
+            Product Image
+          </div>
+
+          <h3>Chakli</h3>
+
+          <p>
+            Crispy traditional chakli.
+          </p>
+
+          <a href="#contact" class="button">
+            Enquire
+          </a>
+        </div>
+
+
+        <div class="product">
+          <div class="product-image">
+            Product Image
+          </div>
+
+          <h3>Traditional Snacks</h3>
+
+          <p>
+            Explore our range of snacks.
+          </p>
+
+          <a href="#contact" class="button">
+            Enquire
+          </a>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <section id="about">
+
+      <div class="about">
+
+        <h2 class="section-title">
+          About CrispoNest Foods
+        </h2>
+
+        <p>
+          CrispoNest Foods brings traditional Indian snacks to customers
+          with a focus on authentic taste, quality ingredients and
+          consistent preparation.
+        </p>
+
+      </div>
+
+    </section>
+
+
+    <section class="contact" id="contact">
+
+      <h2 class="section-title">
+        Enquire With Us
+      </h2>
+
+      <p>
+        Interested in our products or bulk orders?
+      </p>
+
+      <br>
+
+      <a href="https://wa.me/" class="button">
+        WhatsApp Us
+      </a>
+
+      <a href="mailto:" class="button secondary">
+        Send Email
+      </a>
+
+    </section>
+
+  </main>
+
+
+  <footer>
+
+    <p>
+      © 2026 CrispoNest Foods. All rights reserved.
+    </p>
+
+  </footer>
+
+</body>
+</html>
