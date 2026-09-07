@@ -214,58 +214,53 @@
         Our Products
       </h2>
 
-      <div class="products">
+      
+         
+<script>
+async function loadProducts() {
+  const { data, error } = await supabaseClient
+    .from("products")
+    .select("name, description, price, pack_size, image_url, category")
+    .order("id", { ascending: true });
 
-        <div class="product">
-          <div class="product-image">
-            Product Image
-          </div>
+  const container = document.querySelector(".products");
 
-          <h3>Nippat</h3>
+  if (error) {
+    console.error("Error loading products:", error);
+    container.innerHTML = "<p>Unable to load products.</p>";
+    return;
+  }
 
-          <p>
-            Traditional crispy snack.
-          </p>
+  container.innerHTML = data.map(product => `
+    <div class="product">
 
-          <a href="#contact" class="button">
-            Enquire
-          </a>
-        </div>
+      <div class="product-image">
+        ${
+          product.image_url
+            ? `<img src="${product.image_url}" alt="${product.name}"
+                 style="width:100%;height:100%;object-fit:contain;border-radius:14px;">`
+            : "Product Image"
+        }
+      </div>
 
+      <h3>${product.name}</h3>
 
-        <div class="product">
-          <div class="product-image">
-            Product Image
-          </div>
+      <p>${product.description || ""}</p>
 
-          <h3>Chakli</h3>
+      <p><strong>₹${product.price}</strong></p>
 
-          <p>
-            Crispy traditional chakli.
-          </p>
+      <p>${product.pack_size || ""}</p>
 
-          <a href="#contact" class="button">
-            Enquire
-          </a>
-        </div>
+      <a href="#contact" class="button">
+        Enquire
+      </a>
 
+    </div>
+  `).join("");
+}
 
-        <div class="product">
-          <div class="product-image">
-            Product Image
-          </div>
-
-          <h3>Traditional Snacks</h3>
-
-          <p>
-            Explore our range of snacks.
-          </p>
-
-          <a href="#contact" class="button">
-            Enquire
-          </a>
-        </div>
-
+loadProducts();
+</script>
       </div>
 
     </section>
