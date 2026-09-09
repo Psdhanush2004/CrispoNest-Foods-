@@ -295,6 +295,23 @@ loadProducts();
         Interested in our products or bulk orders?
       </p>
 
+     <form id="enquiryForm" style="max-width:500px;margin:20px auto;text-align:left;">
+  <input type="text" id="enquiryName" placeholder="Your Name" required
+    style="width:100%;padding:12px;margin:6px 0;box-sizing:border-box;">
+
+  <input type="email" id="enquiryEmail" placeholder="Your Email" required
+    style="width:100%;padding:12px;margin:6px 0;box-sizing:border-box;">
+
+  <input type="tel" id="enquiryPhone" placeholder="Your Phone Number" required
+    style="width:100%;padding:12px;margin:6px 0;box-sizing:border-box;">
+
+  <textarea id="enquiryMessage" placeholder="Your Message" required
+    style="width:100%;padding:12px;margin:6px 0;box-sizing:border-box;min-height:100px;"></textarea>
+
+  <button type="submit" class="button">Send Enquiry</button>
+
+  <p id="enquiryStatus"></p>
+</form>
       <br>
 
       <a href="https://wa.me/" class="button">
@@ -318,5 +335,38 @@ loadProducts();
 
   </footer>
 
+<script>
+document.getElementById("enquiryForm").addEventListener("submit", async function(event) {
+  event.preventDefault();
+
+  const name = document.getElementById("enquiryName").value;
+  const email = document.getElementById("enquiryEmail").value;
+  const phone = document.getElementById("enquiryPhone").value;
+  const message = document.getElementById("enquiryMessage").value;
+  const status = document.getElementById("enquiryStatus");
+
+  status.textContent = "Sending...";
+
+  const { error } = await supabaseClient
+    .from("enquires")
+    .insert([
+      {
+        name: name,
+        email: email,
+        phone: phone,
+        message: message
+      }
+    ]);
+
+  if (error) {
+    console.error("Enquiry error:", error);
+    status.textContent = "Unable to send enquiry. Please try again.";
+    return;
+  }
+
+  status.textContent = "Thank you! Your enquiry has been sent.";
+  document.getElementById("enquiryForm").reset();
+});
+</script>
 </body>
 </html>
