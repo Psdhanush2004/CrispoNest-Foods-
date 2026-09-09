@@ -718,43 +718,54 @@ async function calculateDeliveryAndContinue() {
     alert("Please enter a valid 6-digit pincode.");
     return;
   }
+
   const functionUrl =
-   "https://vmwrnuoseaefevsezist.supabase.co/functions/v1/delhivery-rate";
+    "https://vmwrnuoseaefveszist.supabase.co/functions/v1/delhivery-rate";
+
   const totalWeight = cart.reduce(
     (total, item) => total + (item.weight * item.quantity),
     0
   );
 
-  const response = await fetch(functionUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "apikey": SUPABASE_PUBLISHABLE_KEY,
-      "Authorization": "Bearer " + SUPABASE_PUBLISHABLE_KEY
-    },
-    body: JSON.stringify({
-      destination_pincode: pincode,
-      weight_grams: totalWeight
-    })
-  });
-
-  const result = await response.json();
-
-  if (!response.ok) {
-    console.error("Delhivery error:", result);
-    alert("Unable to calculate delivery charges. Please try again.");
+  if (!totalWeight || totalWeight <= 0) {
+    alert("Unable to calculate order weight.");
     return;
   }
 
-  console.log("Delhivery response:", result);
+  try {
+    const response = await fetch(functionUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_PUBLISHABLE_KEY,
+        "Authorization": "Bearer " + SUPABASE_PUBLISHABLE_KEY
+      },
+      body: JSON.stringify({
+        d_pin: pincode,
+        cgm: totalWeight
+      })
+    });
 
-  alert(
-    "Delivery details saved successfully.\n\n" +
-    "Delhivery shipping calculation completed.\n\n" +
-    "Please check the browser console for the returned shipping amount."
-  );
+    const result = await response.json();
 
-}
+    console.log("Delhivery response:", result);
+
+    if (!response.ok) {
+      console.error("Delhivery error:", result);
+      alert("Unable to calculate delivery charges. Please try again.");
+      return;
+    }
+
+    alert(
+      "Delivery charge calculated successfully.\n\n" +
+      "Total Weight: " + totalWeight + " g\n\n" +
+      "Delhivery response received."
+    );
+
+  } catch (error) {
+    console.error("Connection error:", error);
+    alert("Unable to connect to the delivery service. Please try again.");
+  }
 
 document.addEventListener("DOMContentLoaded", function() {
 
