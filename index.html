@@ -696,7 +696,7 @@ function closeCheckout() {
 }
 
 
-function calculateDeliveryAndContinue() {
+async function calculateDeliveryAndContinue() {
   const name = document.getElementById("checkoutName").value.trim();
   const phone = document.getElementById("checkoutPhone").value.trim();
   const address = document.getElementById("checkoutAddress").value.trim();
@@ -718,11 +718,43 @@ function calculateDeliveryAndContinue() {
     alert("Please enter a valid 6-digit pincode.");
     return;
   }
+  const functionUrl =
+    "https://vmwrnuoseaefveszist.supabase.co/functions/v1/delhivery-rate";
+
+  const totalWeight = cart.reduce(
+    (total, item) => total + (item.weight * item.quantity),
+    0
+  );
+
+  const response = await fetch(functionUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": "Bearer " + SUPABASE_PUBLISHABLE_KEY
+    },
+    body: JSON.stringify({
+      destination_pincode: pincode,
+      weight_grams: totalWeight
+    })
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    console.error("Delhivery error:", result);
+    alert("Unable to calculate delivery charges. Please try again.");
+    return;
+  }
+
+  console.log("Delhivery response:", result);
 
   alert(
-    "Delivery details saved.\n\n" +
-    "Next we will connect Delhivery to calculate the shipping charge automatically."
+    "Delivery details saved successfully.\n\n" +
+    "Delhivery shipping calculation completed.\n\n" +
+    "Please check the browser console for the returned shipping amount."
   );
+
 }
 
 document.addEventListener("DOMContentLoaded", function() {
