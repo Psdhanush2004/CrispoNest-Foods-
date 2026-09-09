@@ -721,8 +721,14 @@ async function calculateDeliveryAndContinue() {
 
   const functionUrl =
     "https://vmwrnuoseaefevsezist.supabase.co/functions/v1/delhivery-rate";
+
   const totalWeight = cart.reduce(
     (total, item) => total + (item.weight * item.quantity),
+    0
+  );
+
+  const productTotal = cart.reduce(
+    (total, item) => total + (item.price * item.quantity),
     0
   );
 
@@ -755,13 +761,31 @@ async function calculateDeliveryAndContinue() {
       return;
     }
 
+    const shippingCharge = Number(
+      result.data?.[0]?.total_amount || 0
+    );
+
+    if (shippingCharge <= 0) {
+      alert("Delhivery returned an invalid shipping charge.");
+      return;
+    }
+
+    const finalTotal = productTotal + shippingCharge;
+
+    document.getElementById("checkoutShipping").textContent =
+      "₹" + shippingCharge.toFixed(2);
+
+    document.getElementById("checkoutFinalTotal").textContent =
+      "₹" + finalTotal.toFixed(2);
+
     alert(
       "Delivery charge calculated successfully.\n\n" +
-      "Total Weight: " + totalWeight + " g\n\n" +
-      "Delhivery response received."
+      "Delivery Charges: ₹" + shippingCharge.toFixed(2) + "\n" +
+      "Final Total: ₹" + finalTotal.toFixed(2)
     );
 
   } catch (error) {
+    console.error("Delivery calculation error:", error);
     alert("Unable to connect to the delivery service. Please try again.");
   }
 }
