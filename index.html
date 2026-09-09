@@ -486,8 +486,244 @@ function openCart() {
 function closeCart() {
   document.getElementById("cartPanel").style.display = "none";
 }
-
 function checkout() {
+  if (cart.length === 0) {
+    alert("Please add products to your cart first.");
+    return;
+  }
+
+  document.getElementById("cartPanel").style.display = "none";
+
+  let checkoutPanel = document.getElementById("checkoutPanel");
+
+  if (!checkoutPanel) {
+    checkoutPanel = document.createElement("div");
+    checkoutPanel.id = "checkoutPanel";
+
+    checkoutPanel.style.cssText = `
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.55);
+      z-index:10000;
+      overflow-y:auto;
+      padding:30px 15px;
+    `;
+
+    checkoutPanel.innerHTML = `
+      <div style="
+        max-width:600px;
+        margin:20px auto;
+        background:white;
+        border-radius:16px;
+        padding:25px;
+        box-shadow:0 8px 30px rgba(0,0,0,0.3);
+      ">
+
+        <div style="
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          margin-bottom:20px;
+        ">
+          <h2 style="margin:0;">Checkout</h2>
+
+          <button
+            onclick="closeCheckout()"
+            style="
+              border:none;
+              background:none;
+              font-size:26px;
+              cursor:pointer;
+            "
+          >×</button>
+        </div>
+
+        <p style="margin-bottom:20px;">
+          Enter your delivery details below.
+        </p>
+
+        <label>Full Name *</label>
+        <input
+          id="checkoutName"
+          type="text"
+          placeholder="Enter your full name"
+          style="width:100%;padding:12px;margin:6px 0 15px;border:1px solid #ccc;border-radius:8px;"
+        >
+
+        <label>Mobile Number *</label>
+        <input
+          id="checkoutPhone"
+          type="tel"
+          placeholder="10-digit mobile number"
+          maxlength="10"
+          style="width:100%;padding:12px;margin:6px 0 15px;border:1px solid #ccc;border-radius:8px;"
+        >
+
+        <label>Full Delivery Address *</label>
+        <textarea
+          id="checkoutAddress"
+          rows="4"
+          placeholder="House/Flat No, Street, Area"
+          style="width:100%;padding:12px;margin:6px 0 15px;border:1px solid #ccc;border-radius:8px;"
+        ></textarea>
+
+        <label>City *</label>
+        <input
+          id="checkoutCity"
+          type="text"
+          placeholder="Enter city"
+          style="width:100%;padding:12px;margin:6px 0 15px;border:1px solid #ccc;border-radius:8px;"
+        >
+
+        <label>State *</label>
+        <input
+          id="checkoutState"
+          type="text"
+          placeholder="Enter state"
+          style="width:100%;padding:12px;margin:6px 0 15px;border:1px solid #ccc;border-radius:8px;"
+        >
+
+        <label>Pincode *</label>
+        <input
+          id="checkoutPincode"
+          type="text"
+          placeholder="6-digit pincode"
+          maxlength="6"
+          style="width:100%;padding:12px;margin:6px 0 20px;border:1px solid #ccc;border-radius:8px;"
+        >
+
+        <div style="
+          background:#f7f7f7;
+          padding:15px;
+          border-radius:10px;
+          margin-bottom:20px;
+        ">
+          <strong>Order Summary</strong>
+
+          <div id="checkoutSummary" style="margin-top:10px;"></div>
+
+          <hr>
+
+          <p>
+            <strong>Product Total:</strong>
+            <span id="checkoutProductTotal">₹0.00</span>
+          </p>
+
+          <p>
+            <strong>Total Weight:</strong>
+            <span id="checkoutWeight">0 g</span>
+          </p>
+
+          <p>
+            <strong>Delivery Charges:</strong>
+            <span id="checkoutShipping">Calculated by Delhivery</span>
+          </p>
+
+          <p style="font-size:18px;">
+            <strong>Final Total:</strong>
+            <span id="checkoutFinalTotal">₹0.00</span>
+          </p>
+        </div>
+
+        <button
+          onclick="calculateDeliveryAndContinue()"
+          style="
+            width:100%;
+            padding:14px;
+            background:#b83b20;
+            color:white;
+            border:none;
+            border-radius:8px;
+            font-size:17px;
+            font-weight:bold;
+            cursor:pointer;
+          "
+        >
+          Continue to Delivery & Payment
+        </button>
+
+      </div>
+    `;
+
+    document.body.appendChild(checkoutPanel);
+  }
+
+  updateCheckoutSummary();
+  checkoutPanel.style.display = "block";
+}
+
+
+function updateCheckoutSummary() {
+  const summary = document.getElementById("checkoutSummary");
+
+  if (!summary) return;
+
+  summary.innerHTML = cart.map(item => `
+    <div style="
+      display:flex;
+      justify-content:space-between;
+      padding:6px 0;
+    ">
+      <span>${item.name} × ${item.quantity}</span>
+      <strong>₹${(item.price * item.quantity).toFixed(2)}</strong>
+    </div>
+  `).join("");
+
+  const productTotal = cart.reduce(
+    (total, item) => total + (item.price * item.quantity),
+    0
+  );
+
+  const totalWeight = cart.reduce(
+    (total, item) => total + (item.weight * item.quantity),
+    0
+  );
+
+  document.getElementById("checkoutProductTotal").textContent =
+    "₹" + productTotal.toFixed(2);
+
+  document.getElementById("checkoutWeight").textContent =
+    totalWeight + " g";
+}
+
+
+function closeCheckout() {
+  const checkoutPanel = document.getElementById("checkoutPanel");
+
+  if (checkoutPanel) {
+    checkoutPanel.style.display = "none";
+  }
+}
+
+
+function calculateDeliveryAndContinue() {
+  const name = document.getElementById("checkoutName").value.trim();
+  const phone = document.getElementById("checkoutPhone").value.trim();
+  const address = document.getElementById("checkoutAddress").value.trim();
+  const city = document.getElementById("checkoutCity").value.trim();
+  const state = document.getElementById("checkoutState").value.trim();
+  const pincode = document.getElementById("checkoutPincode").value.trim();
+
+  if (!name || !phone || !address || !city || !state || !pincode) {
+    alert("Please fill in all delivery details.");
+    return;
+  }
+
+  if (!/^[0-9]{10}$/.test(phone)) {
+    alert("Please enter a valid 10-digit mobile number.");
+    return;
+  }
+
+  if (!/^[0-9]{6}$/.test(pincode)) {
+    alert("Please enter a valid 6-digit pincode.");
+    return;
+  }
+
+  alert(
+    "Delivery details saved.\n\n" +
+    "Next we will connect Delhivery to calculate the shipping charge automatically."
+  );
+}
   if (cart.length === 0) {
     alert("Please add products to your cart first.");
     return;
