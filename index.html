@@ -251,9 +251,9 @@ async function loadProducts() {
 
       <p>${product.pack_size || ""}</p>
 
-      <a href="#contact" class="button">
-        Enquire
-      </a>
+     <button class="button" onclick='addToCart(${product.id}, "${product.name}", ${product.price}, ${product.weight_grams || 0})'>
+  Add to Cart
+</button>
 
     </div>
   `).join("");
