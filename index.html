@@ -763,12 +763,11 @@ async function calculateDeliveryAndContinue() {
     );
 
   } catch (error) {
-    console.error("Connection error:", error);
     alert("Unable to connect to the delivery service. Please try again.");
   }
+}
 
 document.addEventListener("DOMContentLoaded", function() {
-
   const cartButton = document.createElement("button");
 
   cartButton.innerHTML = "🛒 Cart (<span id='cartCount'>0</span>)";
