@@ -368,5 +368,239 @@ document.getElementById("enquiryForm").addEventListener("submit", async function
   document.getElementById("enquiryForm").reset();
 });
 </script>
+  <script>
+let cart = [];
+
+function addToCart(id, name, price, weight) {
+  const existing = cart.find(item => item.id === id);
+
+  if (existing) {
+    existing.quantity++;
+  } else {
+    cart.push({
+      id: id,
+      name: name,
+      price: Number(price),
+      weight: Number(weight) || 0,
+      quantity: 1
+    });
+  }
+
+  updateCart();
+}
+
+function removeFromCart(id) {
+  cart = cart.filter(item => item.id !== id);
+  updateCart();
+}
+
+function changeQuantity(id, change) {
+  const item = cart.find(item => item.id === id);
+
+  if (!item) return;
+
+  item.quantity += change;
+
+  if (item.quantity <= 0) {
+    removeFromCart(id);
+    return;
+  }
+
+  updateCart();
+}
+
+function updateCart() {
+  const cartCount = cart.reduce(
+    (total, item) => total + item.quantity,
+    0
+  );
+
+  const cartTotal = cart.reduce(
+    (total, item) => total + (item.price * item.quantity),
+    0
+  );
+
+  const totalWeight = cart.reduce(
+    (total, item) => total + (item.weight * item.quantity),
+    0
+  );
+
+  document.getElementById("cartCount").textContent = cartCount;
+  document.getElementById("cartTotal").textContent =
+    "₹" + cartTotal.toFixed(2);
+
+  document.getElementById("cartWeight").textContent =
+    totalWeight + " g";
+
+  const cartItems = document.getElementById("cartItems");
+
+  if (cart.length === 0) {
+    cartItems.innerHTML = "<p>Your cart is empty.</p>";
+    return;
+  }
+
+  cartItems.innerHTML = cart.map(item => `
+    <div style="
+      border-bottom:1px solid #ddd;
+      padding:12px 0;
+      margin-bottom:10px;
+    ">
+      <strong>${item.name}</strong>
+
+      <div style="margin-top:6px;">
+        ₹${item.price} × ${item.quantity}
+      </div>
+
+      <div style="margin-top:4px;">
+        Weight: ${item.weight * item.quantity} g
+      </div>
+
+      <div style="margin-top:8px;">
+        <button
+          onclick="changeQuantity(${item.id}, -1)"
+          style="padding:5px 10px;"
+        >−</button>
+
+        <span style="padding:0 10px;">
+          ${item.quantity}
+        </span>
+
+        <button
+          onclick="changeQuantity(${item.id}, 1)"
+          style="padding:5px 10px;"
+        >+</button>
+
+        <button
+          onclick="removeFromCart(${item.id})"
+          style="margin-left:10px;padding:5px 10px;"
+        >Remove</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function openCart() {
+  document.getElementById("cartPanel").style.display = "block";
+}
+
+function closeCart() {
+  document.getElementById("cartPanel").style.display = "none";
+}
+
+function checkout() {
+  if (cart.length === 0) {
+    alert("Please add products to your cart first.");
+    return;
+  }
+
+  alert("Checkout will be connected to Delhivery and payment next.");
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+
+  const cartButton = document.createElement("button");
+
+  cartButton.innerHTML = "🛒 Cart (<span id='cartCount'>0</span>)";
+
+  cartButton.style.cssText = `
+    position:fixed;
+    right:20px;
+    bottom:20px;
+    z-index:9999;
+    background:#b83b20;
+    color:white;
+    border:none;
+    border-radius:30px;
+    padding:14px 22px;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+    box-shadow:0 4px 12px rgba(0,0,0,0.25);
+  `;
+
+  cartButton.onclick = openCart;
+
+  document.body.appendChild(cartButton);
+
+
+  const cartPanel = document.createElement("div");
+
+  cartPanel.id = "cartPanel";
+
+  cartPanel.style.cssText = `
+    display:none;
+    position:fixed;
+    right:20px;
+    bottom:80px;
+    width:360px;
+    max-width:90%;
+    max-height:75vh;
+    overflow-y:auto;
+    background:white;
+    border-radius:16px;
+    padding:20px;
+    z-index:9998;
+    box-shadow:0 8px 30px rgba(0,0,0,0.3);
+  `;
+
+  cartPanel.innerHTML = `
+    <div style="
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:15px;
+    ">
+      <h2 style="margin:0;">Your Cart</h2>
+
+      <button
+        onclick="closeCart()"
+        style="
+          border:none;
+          background:none;
+          font-size:24px;
+          cursor:pointer;
+        "
+      >×</button>
+    </div>
+
+    <div id="cartItems">
+      <p>Your cart is empty.</p>
+    </div>
+
+    <hr>
+
+    <p>
+      <strong>Total Products:</strong>
+      <span id="cartTotal">₹0.00</span>
+    </p>
+
+    <p>
+      <strong>Total Weight:</strong>
+      <span id="cartWeight">0 g</span>
+    </p>
+
+    <button
+      onclick="checkout()"
+      style="
+        width:100%;
+        padding:13px;
+        background:#b83b20;
+        color:white;
+        border:none;
+        border-radius:8px;
+        font-size:16px;
+        font-weight:bold;
+        cursor:pointer;
+      "
+    >
+      Proceed to Checkout
+    </button>
+  `;
+
+  document.body.appendChild(cartPanel);
+
+  updateCart();
+});
+</script>
 </body>
 </html>
