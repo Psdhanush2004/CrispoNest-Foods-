@@ -220,7 +220,7 @@
 async function loadProducts() {
   const { data, error } = await supabaseClient
     .from("products")
-    .select("name, description, price, pack_size, image_url, category")
+    .select("id, name, description, price, pack_size, image_url, category, weight_grams")
     .order("id", { ascending: true });
 
   const container = document.querySelector(".products");
