@@ -162,7 +162,7 @@
     
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
  const SUPABASE_URL = "https://vmwrnuoseaefevsezist.supabase.co";
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_UPtx7gi3eE8iZdOqjbEwPw_PfwWLR3k";
@@ -719,8 +719,11 @@ async function calculateDeliveryAndContinue() {
     return;
   }
 
-  const functionUrl =
+  const delhiveryFunctionUrl =
     "https://vmwrnuoseaefevsezist.supabase.co/functions/v1/delhivery-rate";
+
+  const razorpayFunctionUrl =
+    "https://vmwrnuoseaefevsezist.supabase.co/functions/v1/razorpay-order";
 
   const totalWeight = cart.reduce(
     (total, item) => total + (item.weight * item.quantity),
@@ -738,7 +741,8 @@ async function calculateDeliveryAndContinue() {
   }
 
   try {
-    const response = await fetch(functionUrl, {
+    // STEP 1: Calculate Delhivery charge
+    const deliveryResponse = await fetch(delhiveryFunctionUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -751,18 +755,18 @@ async function calculateDeliveryAndContinue() {
       })
     });
 
-    const result = await response.json();
+    const deliveryResult = await deliveryResponse.json();
 
-    console.log("Delhivery response:", result);
+    console.log("Delhivery response:", deliveryResult);
 
-    if (!response.ok) {
-      console.error("Delhivery error:", result);
+    if (!deliveryResponse.ok) {
+      console.error("Delhivery error:", deliveryResult);
       alert("Unable to calculate delivery charges. Please try again.");
       return;
     }
 
     const shippingCharge = Number(
-      result.data?.[0]?.total_amount || 0
+      deliveryResult.data?.[0]?.total_amount || 0
     );
 
     if (shippingCharge <= 0) {
@@ -772,21 +776,96 @@ async function calculateDeliveryAndContinue() {
 
     const finalTotal = productTotal + shippingCharge;
 
+    // Update checkout summary
     document.getElementById("checkoutShipping").textContent =
       "₹" + shippingCharge.toFixed(2);
 
     document.getElementById("checkoutFinalTotal").textContent =
       "₹" + finalTotal.toFixed(2);
 
-    alert(
-      "Delivery charge calculated successfully.\n\n" +
-      "Delivery Charges: ₹" + shippingCharge.toFixed(2) + "\n" +
-      "Final Total: ₹" + finalTotal.toFixed(2)
-    );
+    // STEP 2: Create Razorpay order
+    const razorpayResponse = await fetch(razorpayFunctionUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_PUBLISHABLE_KEY,
+        "Authorization": "Bearer " + SUPABASE_PUBLISHABLE_KEY
+      },
+      body: JSON.stringify({
+        amount: finalTotal
+      })
+    });
+
+    const razorpayResult = await razorpayResponse.json();
+
+    console.log("Razorpay order response:", razorpayResult);
+
+    if (!razorpayResponse.ok || !razorpayResult.success) {
+      console.error("Razorpay order error:", razorpayResult);
+      alert("Unable to start payment. Please try again.");
+      return;
+    }
+
+    const razorpayOrder = razorpayResult.order;
+    const razorpayKeyId = razorpayResult.key_id;
+
+    // STEP 3: Open Razorpay Checkout
+    const options = {
+      key: razorpayKeyId,
+      amount: razorpayOrder.amount,
+      currency: razorpayOrder.currency,
+      name: "CrispoNest Foods",
+      description: "CrispoNest Foods Order",
+      order_id: razorpayOrder.id,
+
+      prefill: {
+        name: name,
+        contact: "+91" + phone
+      },
+
+      notes: {
+        address: address,
+        city: city,
+        state: state,
+        pincode: pincode
+      },
+
+      theme: {
+        color: "#b83b20"
+      },
+
+      handler: function (response) {
+        console.log("Razorpay payment response:", response);
+
+        alert(
+          "Test payment completed successfully!\n\n" +
+          "Payment ID: " + response.razorpay_payment_id
+        );
+      },
+
+      modal: {
+        ondismiss: function () {
+          console.log("Razorpay checkout closed.");
+        }
+      }
+    };
+
+    const razorpay = new Razorpay(options);
+
+    razorpay.on("payment.failed", function (response) {
+      console.error("Razorpay payment failed:", response.error);
+
+      alert(
+        "Payment failed.\n\n" +
+        "Please try again."
+      );
+    });
+
+    razorpay.open();
 
   } catch (error) {
-    console.error("Delivery calculation error:", error);
-    alert("Unable to connect to the delivery service. Please try again.");
+    console.error("Checkout payment error:", error);
+    alert("Unable to start payment. Please try again.");
   }
 }
 document.addEventListener("DOMContentLoaded", function() {
