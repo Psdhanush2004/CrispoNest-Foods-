@@ -834,15 +834,80 @@ async function calculateDeliveryAndContinue() {
         color: "#b83b20"
       },
 
-      handler: function (response) {
-        console.log("Razorpay payment response:", response);
+      handler: async function (response) {
+  console.log("Razorpay payment response:", response);
 
-        alert(
-          "Test payment completed successfully!\n\n" +
-          "Payment ID: " + response.razorpay_payment_id
-        );
+  const verifyFunctionUrl =
+    "https://vmwrnuoseaefevsezist.supabase.co/functions/v1/verify-razorpay-payment";
+
+  try {
+    const verifyResponse = await fetch(verifyFunctionUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_PUBLISHABLE_KEY,
+        "Authorization": "Bearer " + SUPABASE_PUBLISHABLE_KEY
       },
+      body: JSON.stringify({
+        razorpay_order_id: response.razorpay_order_id,
+        razorpay_payment_id: response.razorpay_payment_id,
+        razorpay_signature: response.razorpay_signature,
 
+        name: name,
+        email: "",
+        phone: phone,
+        address: address,
+        city: city,
+        state: state,
+        pincode: pincode,
+
+        total_amount: finalTotal,
+
+        items: cart.map(function (item) {
+          return {
+            product_id: item.id,
+            quantity: item.quantity,
+            unit_price: item.price
+          };
+        })
+      })
+    });
+
+    const verifyResult = await verifyResponse.json();
+
+    console.log("Payment verification result:", verifyResult);
+
+    if (!verifyResponse.ok || !verifyResult.success) {
+      console.error("Payment verification failed:", verifyResult);
+
+      alert(
+        "Payment was received, but order confirmation failed.\n\n" +
+        "Please contact us with Payment ID:\n" +
+        response.razorpay_payment_id
+      );
+
+      return;
+    }
+
+    alert(
+      "Payment successful! 🎉\n\n" +
+      "Your order has been confirmed.\n\n" +
+      "Payment ID: " +
+      response.razorpay_payment_id
+    );
+
+    console.log("Order saved successfully:", verifyResult);
+
+  } catch (error) {
+    console.error("Verification error:", error);
+
+    alert(
+      "Payment was completed, but we could not confirm the order.\n\n" +
+      "Payment ID: " +
+      response.razorpay_payment_id
+    );
+  }
+},
       modal: {
         ondismiss: function () {
           console.log("Razorpay checkout closed.");
