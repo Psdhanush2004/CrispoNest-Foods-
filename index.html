@@ -791,9 +791,13 @@ async function calculateDeliveryAndContinue() {
         "apikey": SUPABASE_PUBLISHABLE_KEY,
         "Authorization": "Bearer " + SUPABASE_PUBLISHABLE_KEY
       },
-      body: JSON.stringify({
-        amount: finalTotal
-      })
+    body: JSON.stringify({
+  items: cart.map(item => ({
+    product_id: item.id || item.product_id,
+    quantity: item.quantity
+  })),
+  pincode: pincode
+})
     });
 
     const razorpayResult = await razorpayResponse.json();
@@ -861,15 +865,12 @@ async function calculateDeliveryAndContinue() {
         state: state,
         pincode: pincode,
 
-        total_amount: finalTotal,
-
-        items: cart.map(function (item) {
-          return {
-            product_id: item.id,
-            quantity: item.quantity,
-            unit_price: item.price
-          };
-        })
+items: cart.map(function (item) {
+  return {
+    product_id: item.id,
+    quantity: item.quantity
+  };
+})
       })
     });
 
