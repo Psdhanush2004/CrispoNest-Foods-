@@ -838,25 +838,54 @@ signupButton.addEventListener(
     }
 
 
-    /*
-      Save mobile number to the
-      authenticated Supabase account.
-    */
+  /*
+  Make sure the newly created customer
+  has an active Supabase session.
+*/
 
-    const {
-      error: phoneError
-    } =
-      await supabaseClient.auth.updateUser({
+const {
+  data: loginData,
+  error: loginError
+} =
+  await supabaseClient.auth.signInWithPassword({
 
-        phone:
-          "+91" + phoneValue
+    email: emailValue,
 
-      });
+    password: pass
+
+  });
 
 
-    if (phoneError) {
+if (loginError) {
 
-      console.error(phoneError);
+  console.error(loginError);
+
+  signupButton.disabled = false;
+
+  signupButton.textContent =
+    "Create Account";
+
+  showMessage(
+    "Account was created, but automatic login failed. Please try Login with your email and password.",
+    "error"
+  );
+
+  return;
+}
+
+
+  signupButton.disabled = false;
+
+  signupButton.textContent =
+    "Create Account";
+
+  showMessage(
+    "Account created, but mobile number could not be saved.",
+    "error"
+  );
+
+  return;
+}
 
       signupButton.disabled = false;
 
