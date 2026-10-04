@@ -319,6 +319,8 @@
 
 <script>
 
+<script>
+
 const SUPABASE_URL =
   "https://vmwrnuoseaefevsezist.supabase.co";
 
@@ -332,46 +334,79 @@ const supabaseClient = window.supabase.createClient(
 
 let authMode = "login";
 
-const authTitle = document.getElementById("authTitle");
-const authSubtitle = document.getElementById("authSubtitle");
-const nameSection = document.getElementById("nameSection");
-const fullName = document.getElementById("fullName");
-const phone = document.getElementById("phone");
-const password = document.getElementById("password");
-const confirmPassword = document.getElementById("confirmPassword");
+const authTitle =
+  document.getElementById("authTitle");
 
-const passwordSection = document.getElementById("passwordSection");
+const authSubtitle =
+  document.getElementById("authSubtitle");
+
+const nameSection =
+  document.getElementById("nameSection");
+
+const emailSection =
+  document.getElementById("emailSection");
+
+const loginIdentifierSection =
+  document.getElementById("loginIdentifierSection");
+
+const signupPhoneSection =
+  document.getElementById("signupPhoneSection");
+
+const fullName =
+  document.getElementById("fullName");
+
+const email =
+  document.getElementById("email");
+
+const phone =
+  document.getElementById("phone");
+
+const signupPhone =
+  document.getElementById("signupPhone");
+
+const password =
+  document.getElementById("password");
+
+const confirmPassword =
+  document.getElementById("confirmPassword");
+
+const passwordSection =
+  document.getElementById("passwordSection");
+
 const confirmPasswordSection =
   document.getElementById("confirmPasswordSection");
 
-const loginButton = document.getElementById("loginButton");
-const signupButton = document.getElementById("signupButton");
+const loginButton =
+  document.getElementById("loginButton");
+
+const signupButton =
+  document.getElementById("signupButton");
+
 const forgotPasswordButton =
   document.getElementById("forgotPasswordButton");
 
-const otpSection = document.getElementById("otpSection");
-const otp = document.getElementById("otp");
-const verifyOtpButton = document.getElementById("verifyOtpButton");
+const message =
+  document.getElementById("message");
 
-const message = document.getElementById("message");
-const switchText = document.getElementById("switchText");
-const switchButton = document.getElementById("switchButton");
+const switchText =
+  document.getElementById("switchText");
 
-const authCard = document.getElementById("authCard");
-const accountCard = document.getElementById("accountCard");
-
-const accountName = document.getElementById("accountName");
-const accountPhone = document.getElementById("accountPhone");
-const logoutButton = document.getElementById("logoutButton");
+const switchButton =
+  document.getElementById("switchButton");
 
 
 function showMessage(text, type = "") {
+
   message.textContent = text;
-  message.className = "message " + type;
+
+  message.className =
+    "message " + type;
+
 }
 
 
 function validPassword(value) {
+
   return (
     value.length >= 8 &&
     /[A-Z]/.test(value) &&
@@ -379,346 +414,582 @@ function validPassword(value) {
     /\d/.test(value) &&
     /[^A-Za-z0-9]/.test(value)
   );
+
 }
 
 
-function getPhone() {
+function validPhone(value) {
 
-  const number = phone.value.trim();
+  return /^[6-9]\d{9}$/.test(value);
 
-  if (!/^[6-9]\d{9}$/.test(number)) {
-
-    showMessage(
-      "Please enter a valid 10-digit mobile number.",
-      "error"
-    );
-
-    return null;
-  }
-
-  return "+91" + number;
 }
 
 
 /* LOGIN */
 
-loginButton.addEventListener("click", async () => {
+loginButton.addEventListener(
+  "click",
+  async () => {
 
-  const fullPhone = getPhone();
+    const identifier =
+      phone.value.trim();
 
-  if (!fullPhone) return;
+    const pass =
+      password.value;
 
-  const pass = password.value;
+    if (!identifier) {
 
-  if (!pass) {
+      showMessage(
+        "Please enter your mobile number or email.",
+        "error"
+      );
 
-    showMessage(
-      "Please enter your password.",
-      "error"
-    );
+      return;
+    }
 
-    return;
+    if (!pass) {
+
+      showMessage(
+        "Please enter your password.",
+        "error"
+      );
+
+      return;
+    }
+
+    loginButton.disabled = true;
+
+    loginButton.textContent =
+      "Logging in...";
+
+    let result;
+
+
+    /* EMAIL LOGIN */
+
+    if (identifier.includes("@")) {
+
+      result =
+        await supabaseClient.auth
+          .signInWithPassword({
+
+            email: identifier,
+
+            password: pass
+
+          });
+
+    }
+
+
+    /* MOBILE LOGIN */
+
+    else {
+
+      if (!validPhone(identifier)) {
+
+        showMessage(
+          "Please enter a valid 10-digit mobile number or email.",
+          "error"
+        );
+
+        loginButton.disabled = false;
+
+        loginButton.textContent =
+          "Login";
+
+        return;
+      }
+
+
+      result =
+        await supabaseClient.auth
+          .signInWithPassword({
+
+            phone:
+              "+91" + identifier,
+
+            password: pass
+
+          });
+
+    }
+
+
+    loginButton.disabled = false;
+
+    loginButton.textContent =
+      "Login";
+
+
+    if (result.error) {
+
+      console.error(result.error);
+
+      showMessage(
+        "Incorrect mobile/email or password.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    window.location.href =
+      "index.html#products";
+
   }
-
-  loginButton.disabled = true;
-  loginButton.textContent = "Logging in...";
-
-  const { error } =
-    await supabaseClient.auth.signInWithPassword({
-      phone: fullPhone,
-      password: pass
-    });
-
-  loginButton.disabled = false;
-  loginButton.textContent = "Login";
-
-  if (error) {
-
-    console.error(error);
-
-    showMessage(
-      "Incorrect mobile number or password.",
-      "error"
-    );
-
-    return;
-  }
-
-  window.location.href = "index.html#products";
-
-});
+);
 
 
 /* SWITCH LOGIN / SIGNUP */
 
-switchButton.addEventListener("click", () => {
+switchButton.addEventListener(
+  "click",
+  () => {
 
-  if (authMode === "login") {
+    if (authMode === "login") {
 
-    authMode = "signup";
+      authMode = "signup";
 
-    authTitle.textContent = "Create Account";
 
-    authSubtitle.textContent =
-      "Create your CrispoNest Foods account";
+      authTitle.textContent =
+        "Create Account";
 
-    nameSection.classList.remove("hidden");
 
-    confirmPasswordSection.classList.remove("hidden");
+      authSubtitle.textContent =
+        "Create your CrispoNest Foods account";
 
-    loginButton.classList.add("hidden");
 
-    signupButton.classList.remove("hidden");
+      nameSection.classList.remove(
+        "hidden"
+      );
 
-    forgotPasswordButton.style.display = "none";
 
-    switchText.textContent =
-      "Already have an account?";
+      emailSection.classList.remove(
+        "hidden"
+      );
 
-    switchButton.textContent = "Login";
 
-  } else {
+      loginIdentifierSection.classList.add(
+        "hidden"
+      );
 
-    authMode = "login";
 
-    authTitle.textContent = "Login";
+      signupPhoneSection.classList.remove(
+        "hidden"
+      );
 
-    authSubtitle.textContent =
-      "Login using your mobile number and password";
 
-    nameSection.classList.add("hidden");
+      passwordSection.classList.remove(
+        "hidden"
+      );
 
-    confirmPasswordSection.classList.add("hidden");
 
-    loginButton.classList.remove("hidden");
+      confirmPasswordSection.classList.remove(
+        "hidden"
+      );
 
-    signupButton.classList.add("hidden");
 
-    forgotPasswordButton.style.display = "block";
+      loginButton.classList.add(
+        "hidden"
+      );
 
-    switchText.textContent =
-      "New customer?";
 
-    switchButton.textContent = "Create Account";
+      signupButton.classList.remove(
+        "hidden"
+      );
+
+
+      forgotPasswordButton.style.display =
+        "none";
+
+
+      switchText.textContent =
+        "Already have an account?";
+
+
+      switchButton.textContent =
+        "Login";
+
+    }
+
+
+    else {
+
+      authMode = "login";
+
+
+      authTitle.textContent =
+        "Login";
+
+
+      authSubtitle.textContent =
+        "Login using your mobile number or email";
+
+
+      nameSection.classList.add(
+        "hidden"
+      );
+
+
+      emailSection.classList.add(
+        "hidden"
+      );
+
+
+      loginIdentifierSection.classList.remove(
+        "hidden"
+      );
+
+
+      signupPhoneSection.classList.add(
+        "hidden"
+      );
+
+
+      confirmPasswordSection.classList.add(
+        "hidden"
+      );
+
+
+      loginButton.classList.remove(
+        "hidden"
+      );
+
+
+      signupButton.classList.add(
+        "hidden"
+      );
+
+
+      forgotPasswordButton.style.display =
+        "block";
+
+
+      switchText.textContent =
+        "New customer?";
+
+
+      switchButton.textContent =
+        "Create Account";
+
+    }
+
+
+    showMessage("");
 
   }
-
-  otpSection.classList.add("hidden");
-
-  showMessage("");
-
-});
+);
 
 
 /* NEW CUSTOMER SIGNUP */
 
-signupButton.addEventListener("click", async () => {
+signupButton.addEventListener(
+  "click",
+  async () => {
 
-  const fullPhone = getPhone();
+    const name =
+      fullName.value.trim();
 
-  if (!fullPhone) return;
+    const emailValue =
+      email.value.trim().toLowerCase();
 
-  const name = fullName.value.trim();
+    const phoneValue =
+      signupPhone.value.trim();
 
-  if (!name) {
+    const pass =
+      password.value;
 
-    showMessage(
-      "Please enter your full name.",
-      "error"
-    );
+    const confirm =
+      confirmPassword.value;
 
-    return;
-  }
 
-  const pass = password.value;
-  const confirm = confirmPassword.value;
+    if (!name) {
 
-  if (!validPassword(pass)) {
+      showMessage(
+        "Please enter your full name.",
+        "error"
+      );
 
-    showMessage(
-      "Password must contain 8+ characters, uppercase, lowercase, number and special character.",
-      "error"
-    );
+      return;
+    }
 
-    return;
-  }
 
-  if (pass !== confirm) {
+    if (
+      !emailValue ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+        emailValue
+      )
+    ) {
 
-    showMessage(
-      "Passwords do not match.",
-      "error"
-    );
+      showMessage(
+        "Please enter a valid email address.",
+        "error"
+      );
 
-    return;
-  }
+      return;
+    }
 
-  signupButton.disabled = true;
-  signupButton.textContent = "Creating Account...";
 
-  const { error } =
-    await supabaseClient.auth.signUp({
-      phone: fullPhone,
-      password: pass,
-      options: {
-        data: {
-          full_name: name
+    if (!validPhone(phoneValue)) {
+
+      showMessage(
+        "Please enter a valid 10-digit mobile number.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if (!validPassword(pass)) {
+
+      showMessage(
+        "Password must contain 8+ characters, uppercase, lowercase, number and special character.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if (pass !== confirm) {
+
+      showMessage(
+        "Passwords do not match.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    signupButton.disabled = true;
+
+    signupButton.textContent =
+      "Creating Account...";
+
+
+    /*
+      Create account using
+      email + password.
+    */
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.auth.signUp({
+
+        email: emailValue,
+
+        password: pass,
+
+        options: {
+
+          data: {
+
+            full_name: name,
+
+            mobile_number:
+              "+91" + phoneValue
+
+          }
+
         }
-      }
-    });
 
-  signupButton.disabled = false;
-
-  if (error) {
-
-    console.error(error);
-
-    signupButton.textContent = "Create Account";
-
-    showMessage(
-      error.message,
-      "error"
-    );
-
-    return;
-  }
-
-  signupButton.textContent = "Create Account";
-
-  otpSection.classList.remove("hidden");
-
-  loginButton.classList.add("hidden");
-  signupButton.classList.add("hidden");
-
-  nameSection.classList.add("hidden");
-  passwordSection.classList.add("hidden");
-  confirmPasswordSection.classList.add("hidden");
-
-  forgotPasswordButton.style.display = "none";
-
-  switchText.textContent =
-    "Enter the OTP sent to your mobile.";
-
-  switchButton.style.display = "none";
-
-  showMessage(
-    "OTP sent successfully. Verify your mobile number.",
-    "success"
-  );
-
-});
-
-
-/* VERIFY NEW CUSTOMER OTP */
-
-verifyOtpButton.addEventListener("click", async () => {
-
-  const fullPhone = getPhone();
-
-  if (!fullPhone) return;
-
-  const code = otp.value.trim();
-
-  if (!/^\d{6}$/.test(code)) {
-
-    showMessage(
-      "Please enter the 6-digit OTP.",
-      "error"
-    );
-
-    return;
-  }
-
-  verifyOtpButton.disabled = true;
-  verifyOtpButton.textContent = "Verifying...";
-
-  const {
-    data,
-    error
-  } = await supabaseClient.auth.verifyOtp({
-    phone: fullPhone,
-    token: code,
-    type: "sms"
-  });
-
-  verifyOtpButton.disabled = false;
-  verifyOtpButton.textContent = "Verify OTP";
-
-  if (error) {
-
-    console.error(error);
-
-    showMessage(
-      error.message,
-      "error"
-    );
-
-    return;
-  }
-
-  const user = data.user;
-
-  if (!user) {
-
-    showMessage(
-      "Account verification failed.",
-      "error"
-    );
-
-    return;
-  }
-
-  const { error: profileError } =
-    await supabaseClient
-      .from("profiles")
-      .upsert({
-        id: user.id,
-        full_name: fullName.value.trim()
       });
 
-  if (profileError) {
 
-    console.error(profileError);
+    if (error) {
+
+      console.error(error);
+
+      signupButton.disabled = false;
+
+      signupButton.textContent =
+        "Create Account";
+
+      showMessage(
+        error.message,
+        "error"
+      );
+
+      return;
+    }
+
+
+    const user =
+      data.user;
+
+
+    if (!user) {
+
+      signupButton.disabled = false;
+
+      signupButton.textContent =
+        "Create Account";
+
+      showMessage(
+        "Account creation failed.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    /*
+      Save mobile number to the
+      authenticated Supabase account.
+    */
+
+    const {
+      error: phoneError
+    } =
+      await supabaseClient.auth.updateUser({
+
+        phone:
+          "+91" + phoneValue
+
+      });
+
+
+    if (phoneError) {
+
+      console.error(phoneError);
+
+      signupButton.disabled = false;
+
+      signupButton.textContent =
+        "Create Account";
+
+      showMessage(
+        "Account created, but mobile number could not be saved.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    /*
+      Save customer profile.
+    */
+
+    const {
+      error: profileError
+    } =
+      await supabaseClient
+        .from("profiles")
+        .upsert({
+
+          id: user.id,
+
+          full_name: name
+
+        });
+
+
+    if (profileError) {
+
+      console.error(profileError);
+
+      signupButton.disabled = false;
+
+      signupButton.textContent =
+        "Create Account";
+
+      showMessage(
+        "Account created, but profile could not be saved.",
+        "error"
+      );
+
+      return;
+    }
+
 
     showMessage(
-      "Account created, but profile could not be saved.",
-      "error"
+      "Account created successfully!",
+      "success"
     );
 
-    return;
+
+    setTimeout(
+      () => {
+
+        window.location.href =
+          "index.html#products";
+
+      },
+      800
+    );
+
   }
-
-  window.location.href = "index.html#products";
-
-});
+);
 
 
 /* FORGOT PASSWORD */
 
-forgotPasswordButton.addEventListener("click", () => {
+forgotPasswordButton.addEventListener(
+  "click",
+  async () => {
 
-  authTitle.textContent = "Reset Password";
-
-  authSubtitle.textContent =
-    "Password reset will use mobile OTP.";
-
-  showMessage(
-    "We will add the password-reset OTP in the next step.",
-    "success"
-  );
-
-});
+    const identifier =
+      phone.value.trim();
 
 
-/* LOGOUT */
+    if (
+      !identifier ||
+      !identifier.includes("@")
+    ) {
 
-logoutButton.addEventListener("click", async () => {
+      showMessage(
+        "Please enter your email address to reset your password.",
+        "error"
+      );
 
-  await supabaseClient.auth.signOut();
+      return;
+    }
 
-  window.location.reload();
 
-});
+    const {
+      error
+    } =
+      await supabaseClient.auth
+        .resetPasswordForEmail(
+          identifier,
+          {
+
+            redirectTo:
+              window.location.origin +
+              "/CrispoNest-Foods-/account.html"
+
+          }
+        );
+
+
+    if (error) {
+
+      console.error(error);
+
+      showMessage(
+        error.message,
+        "error"
+      );
+
+      return;
+    }
+
+
+    showMessage(
+      "Password reset link sent to your email.",
+      "success"
+    );
+
+  }
+);
 
 
 /* EXISTING SESSION */
@@ -726,8 +997,13 @@ logoutButton.addEventListener("click", async () => {
 async function checkExistingSession() {
 
   const {
-    data: { session }
-  } = await supabaseClient.auth.getSession();
+    data: {
+      session
+    }
+  } =
+    await supabaseClient.auth
+      .getSession();
+
 
   if (session?.user) {
 
@@ -737,6 +1013,7 @@ async function checkExistingSession() {
   }
 
 }
+
 
 checkExistingSession();
 
