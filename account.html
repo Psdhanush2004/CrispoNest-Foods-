@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -186,7 +187,7 @@
       Login using your mobile number
     </p>
 
-    <div id="nameSection" class="hidden">
+   <div id="nameSection" class="hidden">
   <label for="fullName">Full Name</label>
   <input
     type="text"
@@ -195,31 +196,45 @@
   >
 </div>
 
-<label for="phone">Mobile Number</label>
+<div id="emailSection" class="hidden">
+  <label for="email">Email Address</label>
+  <input
+    type="email"
+    id="email"
+    placeholder="Enter your email address"
+  >
+</div>
 
-<input
-  type="tel"
-  id="phone"
-  placeholder="Enter 10-digit mobile number"
-  maxlength="10"
->
+<div id="loginIdentifierSection">
+  <label for="phone">Mobile Number or Email</label>
+  <input
+    type="text"
+    id="phone"
+    placeholder="Enter mobile number or email"
+  >
+</div>
+
+<div id="signupPhoneSection" class="hidden">
+  <label for="signupPhone">Mobile Number</label>
+  <input
+    type="tel"
+    id="signupPhone"
+    placeholder="Enter 10-digit mobile number"
+    maxlength="10"
+  >
+</div>
 
 <div id="passwordSection">
-
   <label for="password">Password</label>
-
   <input
     type="password"
     id="password"
     placeholder="Enter your password"
   >
-
 </div>
 
 <div id="confirmPasswordSection" class="hidden">
-
   <label for="confirmPassword">Confirm Password</label>
-
   <input
     type="password"
     id="confirmPassword"
@@ -229,7 +244,6 @@
   <p style="font-size:13px;color:#666;margin-top:-10px;margin-bottom:15px;">
     Password must contain 8+ characters, uppercase, lowercase, number and special character.
   </p>
-
 </div>
 
 <button class="button" id="loginButton">
