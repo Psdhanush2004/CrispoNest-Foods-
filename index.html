@@ -130,7 +130,25 @@
     .product p {
       color: #666;
     }
+    .product-search {
+  max-width: 600px;
+  margin: 0 auto 25px;
+  padding: 0 15px;
+}
 
+.product-search input {
+  width: 100%;
+  padding: 14px 18px;
+  border: 1px solid #ead8c4;
+  border-radius: 25px;
+  font-size: 16px;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.product-search input:focus {
+  border-color: #8b4513;
+}
     .about {
       text-align: center;
       max-width: 850px;
@@ -227,11 +245,12 @@
     <div class="logo">CrispoNest Foods</div>
 
     <nav>
+  <a href="#productSearch">🔍 Search</a>
   <a href="#home">🏠 Home</a>
   <a href="#products">🍘 Products</a>
-  <a href="#about">ℹ️ About</a>
   <a href="#contact">📞 Contact</a>
   <a href="account.html">👤 My Account</a>
+  <a href="#about">ℹ️ About</a>
 </nav>
   </header>
 
@@ -260,8 +279,18 @@
     <section id="products">
 
       <h2 class="section-title">
-        Our Products
-      </h2>
+  Our Products
+</h2>
+
+<div class="product-search">
+  <input
+    type="text"
+    id="productSearch"
+    placeholder="🔍 Search products..."
+    autocomplete="off"
+  >
+</div>
+
 <div class="products"></div>
       
          
@@ -273,6 +302,7 @@ async function loadProducts() {
     .order("id", { ascending: true });
 
   const container = document.querySelector(".products");
+  const searchInput = document.getElementById("productSearch");
 
   if (error) {
     console.error("Error loading products:", error);
@@ -280,32 +310,52 @@ async function loadProducts() {
     return;
   }
 
-  container.innerHTML = data.map(product => `
-    <div class="product">
+  function renderProducts(products) {
+    container.innerHTML = products.map(product => `
+      <div class="product">
 
-      <div class="product-image">
-        ${
-          product.image_url
-            ? `<img src="${product.image_url}" alt="${product.name}"
-                 style="width:100%;height:100%;object-fit:contain;border-radius:14px;">`
-            : "Product Image"
-        }
+        <div class="product-image">
+          ${
+            product.image_url
+              ? `<img src="${product.image_url}" alt="${product.name}"
+                   style="width:100%;height:100%;object-fit:contain;border-radius:14px;">`
+              : "Product Image"
+          }
+        </div>
+
+        <h3>${product.name}</h3>
+
+        <p>${product.description || ""}</p>
+
+        <p><strong>₹${product.price}</strong></p>
+
+        <p>${product.pack_size || ""}</p>
+
+        <button class="button" onclick='addToCart(${product.id}, "${product.name}", ${product.price}, ${product.weight_grams || 0})'>
+          Add to Cart
+        </button>
+
       </div>
+    `).join("");
 
-      <h3>${product.name}</h3>
+    if (products.length === 0) {
+      container.innerHTML = "<p>No products found.</p>";
+    }
+  }
 
-      <p>${product.description || ""}</p>
+  renderProducts(data);
 
-      <p><strong>₹${product.price}</strong></p>
+  searchInput.addEventListener("input", function () {
+    const searchText = this.value.trim().toLowerCase();
 
-      <p>${product.pack_size || ""}</p>
+    const filteredProducts = data.filter(product =>
+      product.name.toLowerCase().includes(searchText) ||
+      (product.description || "").toLowerCase().includes(searchText) ||
+      (product.category || "").toLowerCase().includes(searchText)
+    );
 
-     <button class="button" onclick='addToCart(${product.id}, "${product.name}", ${product.price}, ${product.weight_grams || 0})'>
-  Add to Cart
-</button>
-
-    </div>
-  `).join("");
+    renderProducts(filteredProducts);
+  });
 }
 
 loadProducts();
