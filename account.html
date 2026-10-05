@@ -954,7 +954,23 @@ forgotPasswordButton.addEventListener(
 );
 
 
-/* EXISTING SESSION */
+/* ACCOUNT SESSION + LOGOUT */
+
+const authCard =
+  document.getElementById("authCard");
+
+const accountCard =
+  document.getElementById("accountCard");
+
+const accountName =
+  document.getElementById("accountName");
+
+const accountPhone =
+  document.getElementById("accountPhone");
+
+const logoutButton =
+  document.getElementById("logoutButton");
+
 
 async function checkExistingSession() {
 
@@ -963,22 +979,95 @@ async function checkExistingSession() {
       session
     }
   } =
-    await supabaseClient.auth
-      .getSession();
+    await supabaseClient.auth.getSession();
 
 
-  if (session?.user) {
+  if (!session?.user) {
 
-    window.location.href =
-      "index.html#products";
+    authCard.classList.remove("hidden");
+
+    accountCard.classList.add("hidden");
+
+    return;
 
   }
+
+
+  const user =
+    session.user;
+
+
+  const fullNameValue =
+    user.user_metadata?.full_name ||
+    "Customer";
+
+
+  const mobileValue =
+    user.phone ||
+    user.user_metadata?.mobile_number ||
+    "-";
+
+
+  accountName.textContent =
+    fullNameValue;
+
+
+  accountPhone.textContent =
+    mobileValue;
+
+
+  authCard.classList.add("hidden");
+
+  accountCard.classList.remove("hidden");
 
 }
 
 
-checkExistingSession();
+/* LOGOUT */
 
+logoutButton.addEventListener(
+  "click",
+  async () => {
+
+    logoutButton.disabled = true;
+
+    logoutButton.textContent =
+      "Logging out...";
+
+
+    const {
+      error
+    } =
+      await supabaseClient.auth.signOut();
+
+
+    if (error) {
+
+      console.error(error);
+
+      logoutButton.disabled = false;
+
+      logoutButton.textContent =
+        "Logout";
+
+      showMessage(
+        error.message,
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    window.location.href =
+      "account.html";
+
+  }
+);
+
+
+checkExistingSession();
 </script>
 
 </body>
