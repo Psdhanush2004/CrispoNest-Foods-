@@ -704,49 +704,61 @@ signupButton.addEventListener(
 
 
     if (!name) {
+
       showMessage(
         "Please enter your full name.",
         "error"
       );
+
       return;
     }
 
 
     if (
       !emailValue ||
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+        emailValue
+      )
     ) {
+
       showMessage(
         "Please enter a valid email address.",
         "error"
       );
+
       return;
     }
 
 
     if (!validPhone(phoneValue)) {
+
       showMessage(
         "Please enter a valid 10-digit mobile number.",
         "error"
       );
+
       return;
     }
 
 
     if (!validPassword(pass)) {
+
       showMessage(
         "Password must contain 8+ characters, uppercase, lowercase, number and special character.",
         "error"
       );
+
       return;
     }
 
 
     if (pass !== confirm) {
+
       showMessage(
         "Passwords do not match.",
         "error"
       );
+
       return;
     }
 
@@ -757,25 +769,31 @@ signupButton.addEventListener(
       "Creating Account...";
 
 
-    /* CREATE ACCOUNT */
+    /*
+      Create customer account
+      through secure Supabase
+      Edge Function.
+    */
 
     const {
       data,
       error
     } =
-      await supabaseClient.auth.signUp({
-        email: emailValue,
-        password: pass,
-        options: {
-          data: {
+      await supabaseClient.functions.invoke(
+        "create-customer-account",
+        {
+          body: {
+            email: emailValue,
+            password: pass,
             full_name: name,
-            mobile_number: "+91" + phoneValue
+            phone: "+91" + phoneValue
           }
         }
-      });
+      );
 
 
     if (error) {
+
       console.error(error);
 
       signupButton.disabled = false;
@@ -784,7 +802,8 @@ signupButton.addEventListener(
         "Create Account";
 
       showMessage(
-        error.message,
+        error.message ||
+        "Unable to create account.",
         "error"
       );
 
@@ -792,17 +811,18 @@ signupButton.addEventListener(
     }
 
 
-    const user =
-      data.user;
+    if (
+      !data ||
+      !data.success
+    ) {
 
-
-    if (!user) {
       signupButton.disabled = false;
 
       signupButton.textContent =
         "Create Account";
 
       showMessage(
+        data?.error ||
         "Account creation failed.",
         "error"
       );
@@ -812,62 +832,26 @@ signupButton.addEventListener(
 
 
     /*
-      Make sure the newly created customer
-      has an active Supabase session.
+      Automatically log the
+      newly created customer in.
     */
 
-    let session =
-      data.session;
+    const {
+      error: loginError
+    } =
+      await supabaseClient.auth
+        .signInWithPassword({
 
-
-    if (!session) {
-
-      const {
-        data: loginData,
-        error: loginError
-      } =
-        await supabaseClient.auth.signInWithPassword({
           email: emailValue,
+
           password: pass
+
         });
 
 
-      if (loginError) {
-        console.error(loginError);
+    if (loginError) {
 
-        signupButton.disabled = false;
-
-        signupButton.textContent =
-          "Create Account";
-
-        showMessage(
-          "Account was created, but automatic login failed. Please login with your email and password.",
-          "error"
-        );
-
-        return;
-      }
-
-
-      session =
-        loginData.session;
-    }
-
-
-    /*
-      Save mobile number.
-    */
-
-    const {
-      error: phoneError
-    } =
-      await supabaseClient.auth.updateUser({
-        phone: "+91" + phoneValue
-      });
-
-
-    if (phoneError) {
-      console.error(phoneError);
+      console.error(loginError);
 
       signupButton.disabled = false;
 
@@ -875,7 +859,7 @@ signupButton.addEventListener(
         "Create Account";
 
       showMessage(
-        "Account created, but mobile number could not be saved.",
+        "Account was created, but automatic login failed. Please login manually.",
         "error"
       );
 
@@ -883,36 +867,10 @@ signupButton.addEventListener(
     }
 
 
-    /*
-      Save customer profile.
-    */
+    signupButton.disabled = false;
 
-    const {
-      error: profileError
-    } =
-      await supabaseClient
-        .from("profiles")
-        .upsert({
-          id: user.id,
-          full_name: name
-        });
-
-
-    if (profileError) {
-      console.error(profileError);
-
-      signupButton.disabled = false;
-
-      signupButton.textContent =
-        "Create Account";
-
-      showMessage(
-        "Account created, but profile could not be saved.",
-        "error"
-      );
-
-      return;
-    }
+    signupButton.textContent =
+      "Create Account";
 
 
     showMessage(
