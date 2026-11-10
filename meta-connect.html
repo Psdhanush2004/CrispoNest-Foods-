@@ -1,0 +1,93 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CrispoNest Foods - WhatsApp Connect</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      text-align: center;
+      padding: 60px 20px;
+    }
+    .box {
+      max-width: 480px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 14px;
+    }
+    button {
+      background: #1877f2;
+      color: white;
+      border: 0;
+      padding: 14px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #status {
+      margin-top: 20px;
+      overflow-wrap: anywhere;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>CrispoNest Foods</h2>
+    <h3>Connect WhatsApp Business</h3>
+    <p>Connect your existing WhatsApp Business account with CrispoNest Foods.</p>
+    <button id="connectBtn" onclick="connectWhatsApp()">
+      Connect WhatsApp
+    </button>
+    <p id="status">Ready to connect.</p>
+  </div>
+
+  <script>
+    window.fbAsyncInit = function () {
+      FB.init({
+        appId: '2183636739034504',
+        cookie: true,
+        xfbml: false,
+        version: 'v23.0'
+      });
+    };
+
+    (function (d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s);
+      js.id = id;
+      js.src = 'https://connect.facebook.net/en_US/sdk.js';
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+
+    function connectWhatsApp() {
+      document.getElementById('status').textContent =
+        'Opening Meta connection...';
+
+      FB.login(function (response) {
+        if (response.authResponse && response.authResponse.code) {
+          document.getElementById('status').textContent =
+            'Authorization received. Secure server connection is the next step.';
+          console.log('Authorization code received.');
+        } else {
+          document.getElementById('status').textContent =
+            'Connection was cancelled or not completed. Please try again.';
+        }
+      }, {
+        config_id: '1385722863122913',
+        response_type: 'code',
+        override_default_response_type: true,
+        extras: {
+          setup: {},
+          featureType: 'whatsapp_business_app_onboarding',
+          sessionInfoVersion: '3'
+        }
+      });
+    }
+  </script>
+</body>
+</html>
